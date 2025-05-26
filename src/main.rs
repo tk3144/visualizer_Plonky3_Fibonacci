@@ -2,7 +2,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 
 use p3_air::{Air, AirBuilder, BaseAir};
-use p3_field::{AbstractField, Field};
+use p3_field::{Field, PrimeCharacteristicRing};
 use p3_matrix::Matrix;
 use p3_matrix::dense::RowMajorMatrix;
 
@@ -12,9 +12,9 @@ use p3_commit::ExtensionMmcs;
 use p3_field::extension::BinomialExtensionField;
 use p3_fri::FriConfig;
 use p3_keccak::Keccak256Hash;
-use p3_merkle_tree::FieldMerkleTreeMmcs;
+use p3_merkle_tree::MerkleTreeMmcs;
 use p3_mersenne_31::Mersenne31;
-use p3_symmetric::{CompressionFunctionFromHasher, SerializingHasher32};
+use p3_symmetric::{CompressionFunctionFromHasher, SerializingHasher};
 use p3_uni_stark::{prove, verify, StarkConfig};
 use tracing_forest::util::LevelFilter;
 use tracing_forest::ForestLayer;
@@ -36,27 +36,27 @@ impl<F: Field> BaseAir<F> for FibonacciAir {
 impl<AB: AirBuilder> Air<AB> for FibonacciAir {
     fn eval(&self, builder: &mut AB) {
         let main = builder.main();
-        let local = main.row_slice(0);
-        let next = main.row_slice(1);
+        let local = main.row_slice(0).unwrap();
+        let next = main.row_slice(1).unwrap();
 
         // Enforce starting values
-        builder.when_first_row().assert_eq(local[0], AB::Expr::zero());
-        builder.when_first_row().assert_eq(local[1], AB::Expr::one());
+        builder.when_first_row().assert_eq(local[0], AB::Expr::ZERO);
+        builder.when_first_row().assert_eq(local[1], AB::Expr::ONE);
 
         // Enforce state transition constraints
         builder.when_transition().assert_eq(next[0], local[1]);
         builder.when_transition().assert_eq(next[1], local[0] + local[1]);
 
         // Constrain the final value
-        let final_value = AB::Expr::from_canonical_u32(self.final_value);
+        let final_value = AB::Expr::from_u32(self.final_value);
         builder.when_last_row().assert_eq(local[1], final_value);
     }
 }
 
 pub fn generate_fibonacci_trace<F: Field>(num_steps: usize) -> RowMajorMatrix<F> {
     let mut values = Vec::with_capacity(num_steps * 2);
-    let mut a = F::zero();
-    let mut b = F::one();
+    let mut a = F::ZERO;
+    let mut b = F::ONE;
     for _ in 0..num_steps {
         values.push(a);
         values.push(b);
@@ -81,14 +81,14 @@ fn main() -> Result<(), impl Debug> {
     type Challenge = BinomialExtensionField<Val, 3>;
 
     type ByteHash = Keccak256Hash;
-    type FieldHash = SerializingHasher32<ByteHash>;
+    type FieldHash = SerializingHasher<ByteHash>;
     let byte_hash = ByteHash {};
     let field_hash = FieldHash::new(Keccak256Hash {});
 
-    type MyCompress = CompressionFunctionFromHasher<u8, ByteHash, 2, 32>;
+    type MyCompress = CompressionFunctionFromHasher<ByteHash, 2, 32>;
     let compress = MyCompress::new(byte_hash);
 
-    type ValMmcs = FieldMerkleTreeMmcs<Val, u8, FieldHash, MyCompress, 32>;
+    type ValMmcs = MerkleTreeMmcs<Val, u8, FieldHash, MyCompress, 32>;
     let val_mmcs = ValMmcs::new(field_hash, compress);
 
     type ChallengeMmcs = ExtensionMmcs<Val, Challenge, ValMmcs>;
@@ -101,6 +101,7 @@ fn main() -> Result<(), impl Debug> {
         num_queries: 100,
         proof_of_work_bits: 16,
         mmcs: challenge_mmcs,
+        log_final_poly_len: 1,
     };
 
     type Pcs = CirclePcs<Val, ValMmcs, ChallengeMmcs>;
@@ -111,16 +112,14 @@ fn main() -> Result<(), impl Debug> {
     };
 
     type MyConfig = StarkConfig<Pcs, Challenge, Challenger>;
-    let config = MyConfig::new(pcs);
+    let challenger = Challenger::from_hasher(vec![], byte_hash);
+    let config = MyConfig::new(pcs, challenger);
 
     let num_steps = 8; // Choose the number of Fibonacci steps
     let final_value = 21; // Choose the final Fibonacci value
     let air = FibonacciAir { num_steps, final_value };
     let trace = generate_fibonacci_trace::<Val>(num_steps);
+    let proof = prove(&config, &air, trace, &vec![]);
 
-    let mut challenger = Challenger::from_hasher(vec![], byte_hash);
-    let proof = prove(&config, &air, &mut challenger, trace, &vec![]);
-
-    let mut challenger = Challenger::from_hasher(vec![], byte_hash);
-    verify(&config, &air, &mut challenger, &proof, &vec![])
+    verify(&config, &air, &proof, &vec![])
 }
