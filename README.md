@@ -46,6 +46,6 @@ __Plonky3 & Matrix Logic__
 * [p3_matrix::Matrix](https://docs.rs/p3-matrix/latest/p3_matrix/)
 
 __Web Technologies__
-
-
-
+* [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+* [JSON (JavaScript Object Notation)](https://developer.mozilla.org/en-US/docs/Glossary/JSON)
+* [DOM Manipulation](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)
