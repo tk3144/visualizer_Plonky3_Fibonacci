@@ -22,10 +22,30 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{EnvFilter, Registry};
 
+
+
+//-----------------------------------------------------------
+// Importing for File Handling, Writing, and Serialization for the Visualizer
+use serde::Serialize;
+use std::fs::File;
+use std::io::Write;
+
+// Macro for implementing the Serialize and Clone traits
+#[derive(Serialize, Clone)]
+
+// VisData acts as the data container to serialize
+struct VisData {
+    num_steps: usize,           // unsigned int, number of fibonacci steps
+    trace: Vec<Vec<String>>,    // vector of vectors (matrix) of type String
+}
+//-----------------------------------------------------------
+
+
 pub struct FibonacciAir {
     pub num_steps: usize,
     pub final_value: u32,
 }
+
 
 impl<F: Field> BaseAir<F> for FibonacciAir {
     fn width(&self) -> usize {
@@ -115,11 +135,41 @@ fn main() -> Result<(), impl Debug> {
     let challenger = Challenger::from_hasher(vec![], byte_hash);
     let config = MyConfig::new(pcs, challenger);
 
-    let num_steps = 8; // Choose the number of Fibonacci steps
+    let num_steps = 8; // Choose the number of Fibonacci steps in powers of 2^n
     let final_value = 21; // Choose the final Fibonacci value
     let air = FibonacciAir { num_steps, final_value };
     let trace = generate_fibonacci_trace::<Val>(num_steps);
-    let proof = prove(&config, &air, trace, &vec![]);
+    
 
+    //-----------------------------------------------------------
+    // Create a mutable trace matrix (Vec<Vec<String>>). We populate it by iterating through Seong's trace variable (line 141) with 
+    // the p3_matrix::Matrix method signature for height (returns number of rows).
+
+    let mut trace_matrix = Vec::new();
+
+    for i in 0..trace.height() {
+        let row = trace
+                        .row_slice(i)           // Accesses row i of the trace matrix, returning Some(&[F]) if exists, else None. 
+                        .unwrap()               // Returns the slice. Will panic if i is out of bounds.
+                        .iter()                 // Creates an iterator (pointer) over the elements of a specific row.
+                        .map(|v| v.to_string()) // For every element v produced/pointed by the iterator, convert it from Mersenne31 to String.
+                        .collect();             // Collects iterator, allocated memory on the heap, and pushes the strings into a Vec<String>.
+        trace_matrix.push(row); // Appends row (Vec<String>) to the end of trace_matrix (Vec<Vec<String>>).
+    }
+    
+    // Create an immutable instance of the VisData struct to Export
+    let vis_data = VisData{num_steps, trace: trace_matrix};
+
+    // Export trace
+    let json_valid = serde_json::to_string_pretty(&vis_data).unwrap(); // Convert vis_data into a JSON formatted string. to_string_pretty() provides indentation and newlines.
+    std::fs::create_dir_all("web").expect("Failed to create web directory"); // Create the web/ directory if it does not already exist. 
+    let mut file_valid = File::create("web/trace_data.json").expect("Failed to create web/trace_data.json");
+    file_valid.write_all(json_valid.as_bytes()).unwrap();
+    println!("Valid trace exported to web/trace_data.json");
+
+    //-----------------------------------------------------------
+
+
+    let proof = prove(&config, &air, trace, &vec![]);
     verify(&config, &air, &proof, &vec![])
 }

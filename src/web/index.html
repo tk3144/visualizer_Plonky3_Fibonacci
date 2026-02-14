@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plonky3 Fibonacci AIR Visualizer</title>
+    <style>
+        body {
+            font-family: 'Arial', monospace;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .trace-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .trace-table th {
+            background: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        .trace-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        .first-row {
+            background: #fff3e0;
+        }
+        .last-row {
+            background: #f3e5f5;
+        }
+        .transition-row {
+            background: #e8f5e9;
+        }
+        .constraint {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+        }
+        .constraint-label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .start { background: #41e979; color: white; }
+        .trans { background: #eda752; color: white; }
+        .final { background: #5564c9; color: white; }
+        .sequence {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        .arrow { color: #4CAF50; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>AIR Visualizer - Plonky3 Fibonacci</h1>
+    
+    <div id="sequence" class="sequence"></div>
+    
+    <table class="trace-table">
+        <thead>
+            <tr>
+                <th>Row</th>
+                <th>Column 0 (a)</th>
+                <th>Column 1 (b)</th>
+                <th>Constraints</th>
+            </tr>
+        </thead>
+        <tbody id="trace-body">
+        </tbody>
+    </table>
+
+    <div class="info">
+        <strong>AIR Constraints:</strong><br>
+        <span class="constraint-label start">START</span> First row: a = 0, b = 1<br>
+        <span class="constraint-label trans">TRANSITION</span> Each row: next_a = b, next_b = a + b<br>
+        <span class="constraint-label final">FINAL</span> Last row: b = expected_value
+    </div>
+
+    <script>
+        // Load the trace data
+        fetch('trace_data.json')
+            .then(response => response.json())
+            .then(data => {
+                displayTrace(data);
+            })
+            .catch(error => {
+                document.getElementById('trace-body').innerHTML = 
+                    '<tr><td colspan="4" style="color: red; text-align: center;">Error loading trace_data.json. Make sure the file exists in the same directory.</td></tr>';
+                console.error('Error:', error);
+            });
+
+        function displayTrace(data) {
+            const tbody = document.getElementById('trace-body');
+            const numSteps = data.num_steps;
+            const trace = data.trace;
+
+            // Display Fibonacci sequence
+            const sequence = trace.map(row => row[1]).join(' → ');
+            document.getElementById('sequence').innerHTML = 
+                `<strong>Fibonacci Sequence:</strong> ${sequence}`;
+
+            // Populate table
+            trace.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                
+                // Add row-specific styling
+                if (index === 0) {
+                    tr.classList.add('first-row');
+                } else if (index === numSteps - 1) {
+                    tr.classList.add('last-row');
+                } else {
+                    tr.classList.add('transition-row');
+                }
+
+                // Row number
+                const tdRow = document.createElement('td');
+                tdRow.innerHTML = `<strong>${index}</strong>`;
+                tr.appendChild(tdRow);
+
+                // Column 0 (a)
+                const tdCol0 = document.createElement('td');
+                tdCol0.textContent = row[0];
+                tr.appendChild(tdCol0);
+
+                // Column 1 (b)
+                const tdCol1 = document.createElement('td');
+                tdCol1.textContent = row[1];
+                tr.appendChild(tdCol1);
+
+                // Constraints
+                const tdConstraint = document.createElement('td');
+                let constraints = [];
+                
+                if (index === 0) {
+                    constraints.push('<span class="constraint-label start">START</span>');
+                    constraints.push('<span class="constraint">a = 0, b = 1</span>');
+                }
+                
+                if (index < numSteps - 1) {
+                    constraints.push('<span class="constraint-label trans">TRANSITION</span>');
+                    const nextA = trace[index + 1][0];
+                    const nextB = trace[index + 1][1];
+                    const expectedB = parseInt(row[0]) + parseInt(row[1]);
+                    constraints.push(`<span class="constraint">next = [${row[1]}, ${row[0]}+${row[1]}=${expectedB}]</span>`);
+                }
+                
+                if (index === numSteps - 1) {
+                    constraints.push('<span class="constraint-label final">FINAL</span>');
+                    constraints.push('<span class="constraint">b = 21 (expected)</span>');
+                }
+                
+                tdConstraint.innerHTML = constraints.join('<br>');
+                tr.appendChild(tdConstraint);
+
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
