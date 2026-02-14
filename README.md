@@ -4,20 +4,23 @@ The project is sourced from [Plonky3_Fibonacci](https://github.com/BrianSeong99/
 
 
 ## How to run the Demo:
-### 1. In 'main.rs', run the Rust program which will generate the trace data as a JSON file (web/trace_data.json).
+### 1. In `main.rs`, run the Rust program which will generate the trace data as a JSON file (web/trace_data.json).
 ```bash
 cargo run
 ```
 
-### 2. Navigate to the 'web/' directory, type the following:
+### 2. Navigate to the `web/` directory, type the following:
 ```bash
 cd web
 python3 -m http.server 8000
 ```
-This will allow you to visit the [http://localhost:8000](http://localhost:8000) in your browser. 
-* Note: If you change the value of 'num_steps' in Rust, but do not see changes in the browser, please perform a Hard Refresh to clear the browser's cache:
-Mac: 'Cmd + Shift + R'
-Windows: 'Ctrl + F5'
+This will allow you to visit the [http://localhost:8000](http://localhost:8000) in your browser.
+> To stop the local host server from running, user `Ctrl + Z`
+* Note: If you change the value of `num_steps` in Rust, but do not see changes in the browser, please perform a Hard Refresh to clear the browser's cache:
+> Mac: `Cmd + Shift + R`
+> Windows: `Ctrl + F5`
+* Note: If you get an "Address already in use" error, it means a previous server used is still running. You can force kill any process (on port 8000 for instance) with the following:
+> `lsof -ti:8000 | xargs kill -9`
 
 
 You may modify the sequence length by changing the value of the variables in 'src/main.rs' (lines 138-139):
