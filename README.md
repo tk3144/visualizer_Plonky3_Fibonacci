@@ -15,7 +15,7 @@ cd web
 python3 -m http.server 8000
 ```
 #### 3. Visit [http://localhost:8000](http://localhost:8000) in your browser.
-> To stop the local host server from running, use `Ctrl + Z`
+> To suspend the local host server from running, use `Ctrl + Z`
 
 #### 4. You may modify the sequence length by changing the value of the variables in 'src/main.rs' (lines 138-139):
 ```bash
