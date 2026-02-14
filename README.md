@@ -39,16 +39,12 @@ __Rust & File Handling__
 * [Serde JSON](https://docs.rs/serde_json/latest/serde_json/) Converting serialized data into JSON (String) (Note: This [video](https://www.youtube.com/watch?v=YLZtw8_aLwA) helped a lot).
 * [std::fs::File](https://doc.rust-lang.org/std/fs/struct.File.html) & [std::io::Write](https://doc.rust-lang.org/std/io/trait.Write.html) Filesystem operations, specifically used for creating the output file and writing the JSON byte buffer.
 * [Vec](https://doc.rust-lang.org/std/vec/struct.Vec.html) used to dynamically construct the `trace_matrix` (`Vec<Vec<String>>`).
-
-  
 __Plonky3 & Matrix Logic__
 * [Plonky3_Fibonacci](https://github.com/BrianSeong99/Plonky3_Fibonacci)
 * ["Getting Started with Plonky3: Build, Prove, & Verify in ZK"](https://www.youtube.com/watch?v=l7v0Cr-cktg)
 * [Mersenne31](https://docs.rs/p3-mersenne-31/latest/p3_mersenne_31/) & ["31 and Mersenne Primes - Numberphile"](https://www.youtube.com/watch?v=PLL0mo5rHhk) 
 * [p3_matrix::Matrix](https://docs.rs/p3-matrix/latest/p3_matrix/)
-
-  
-**Web Technologies**
+__Web Technologies__
 * [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
 * [JSON (JavaScript Object Notation)](https://developer.mozilla.org/en-US/docs/Glossary/JSON)
 * [DOM Manipulation](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)
