@@ -136,7 +136,7 @@ fn main() -> Result<(), impl Debug> {
     let config = MyConfig::new(pcs, challenger);
 
     let num_steps = 8; // Choose the number of Fibonacci steps in powers of 2^n
-    let final_value = 21; // Choose the final Fibonacci value
+    let final_value = 21; // Expected result of final Fibonacci value
     let air = FibonacciAir { num_steps, final_value };
     let trace = generate_fibonacci_trace::<Val>(num_steps);
     
