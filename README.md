@@ -24,10 +24,11 @@ let final_value = 21; // Expected result of final Fibonacci value
 ```
 
 * Note: If you change the value of `num_steps` in Rust, but do not see changes in the browser, please perform a Hard Refresh to clear the browser's cache:
-> Mac: `Cmd + Shift + R`
-> Windows: `Ctrl + F5`
+>> Mac: `Cmd + Shift + R`
+>> Windows: `Ctrl + F5`
+
 * Note: If you get an "Address already in use" error, it means a previous server used is still running. You can force kill any process (on port 8000 for instance) with the following:
-> `lsof -ti:8000 | xargs kill -9`
+>> `lsof -ti:8000 | xargs kill -9`
 
 
 
