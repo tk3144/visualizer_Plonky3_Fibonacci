@@ -17,14 +17,14 @@ python3 -m http.server 8000
 #### 3. Visit [http://localhost:8000](http://localhost:8000) in your browser.
 > To suspend the local host server from running, use `Ctrl + Z`
 
-#### 4. You may modify the sequence length by changing the value of the variables in 'src/main.rs' (lines 138-139):
+#### 4. You may modify the sequence length by changing the value of the variables in `src/main.rs` (lines 138-139):
 ```bash
 let num_steps = 8; // Choose the number of Fibonacci steps in powers of 2^n
 let final_value = 21; // Expected result of final Fibonacci value
 ```
 
 ### Troubleshooting
-* __Cache__: If you change the value of `num_steps` in Rust, but do not see changes in the browser, please perform a Hard Refresh to clear the browser's cache:
+* __Cache__: If you change the value of `num_steps` in Rust and successfully run once again, but do not see changes in the browser, please perform a Hard Refresh to clear the browser's cache:
   - Mac: `Cmd + Shift + R`
   - Windows: `Ctrl + F5`
 
