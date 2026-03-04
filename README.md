@@ -4,7 +4,7 @@ The project is sourced from [Plonky3_Fibonacci](https://github.com/BrianSeong99/
 
 
 ### How to run the Demo:
-#### 1. In `main.rs`, run the Rust program which will generate the trace data as a JSON file (`web/trace_data.json`).
+#### 1. In `src/`, run the Rust program which will generate the trace data as a JSON file (`web/trace_data.json`).
 ```bash
 cargo run
 ```
